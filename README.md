@@ -15,4 +15,4 @@ npm install
 npm run start
 ```
 
-In chrome navigate to localhost:8080
+In chrome navigate to http://localhost:8080
