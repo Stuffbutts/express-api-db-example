@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"
+      integrity="sha512-1Gn7//DzfuF67BGkg97Oc6jPN6hqxuZXnaTpC9P5uw8C6W4yUNj5hoS/APga4g1nO2X6USBb/rXtGzADdaVDeA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>
+      Sample
+    </title>
+    <style>
+      #table-container {
+        width: 400px;
+        padding: 1em;
+        border: 1px solid navy;
+        border-radius: 2px;
+        background-color: #fefefe;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      td {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      sample changes daslkjgkldjalkgka
+
+      <p><a href="/create-student">Create a student</a></p>
+
+      <div
+        style="
+          width: 200px;
+          height: 80px;
+          border: 1px;
+          border-color: red;
+          border-style: solid;
+          padding: 1em;
+          margin: 1em;
+        "
+      >
+        <form action="/create-student" method="post">
+          <label for="studentName">Student Name</label>
+          <input type="text" name="studentName" id="student-name" />
+          <button type="submit">create a student (POST)</button>
+        </form>
+      </div>
+      <div id="table-container">
+        <button onclick="fetchStudents_onclick()">Fetch Students</button>
+        <div id="table-instance"></div>
+      </div>
+    </div>
+  </body>
+  <script>
+    /// headers { Id: "Student Id", Name: "Student Name" }
+    /// rows [ { Id: [value], Name: [value] } ]
+    function createTable(headers, rows) {
+      /**
+       * <table>
+       *  <thead>
+       *    <tr>
+       *      <th scope="col">
+       *      </th>
+       *    </tr>
+       *  </thead>
+       *  <tbody>
+       *    <tr>
+       *      <td....>
+       *    </tr>
+       *  </tbody>
+       * </table>
+       **/
+
+      const table = document.createElement("table");
+
+      const header = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+
+      const headerKeys = Object.keys(headers);
+
+      for (let i = 0; i < headerKeys.length; i++) {
+        const headerCell = document.createElement("th");
+        headerCell.id = "column-" + headerKeys[i]; // column-Name; column-Id
+        headerCell.textContent =
+          headers[
+            headerKeys[i] // Id, Name
+          ]; // headers["Name"]: "Student Name"
+        headerRow.appendChild(headerCell);
+      }
+
+      header.appendChild(headerRow);
+
+      table.appendChild(header);
+
+      const body = document.createElement("tbody");
+
+      for (let r = 0; r < rows.length; r++) {
+        const row = createRow(rows[r]);
+
+        body.appendChild(row);
+      }
+
+      table.appendChild(body);
+
+      return table;
+    }
+
+    function insertTable(table) {
+      const tableContainer = document.querySelector("div#table-instance");
+      tableContainer.appendChild(table);
+      return tableContainer;
+    }
+
+    function createRow(data) {
+      const row = document.createElement("tr");
+      const keys = Object.keys(data);
+
+      for (let i = 0; i < keys.length; i++) {
+        const cell = document.createElement("td");
+        cell.id = `row-${i}-${keys[i]}`;
+        cell.textContent = data[keys[i]];
+        row.appendChild(cell);
+      }
+
+      return row;
+    }
+
+    async function fetchStudentsAsync() {
+      console.log("Fetching Students");
+      const response = await fetch("/students");
+
+      if (!response.ok) {
+        alert("Failed fetching students");
+        return;
+      }
+      const body = await response.json();
+      console.log("Fetched Students", body);
+
+      return body;
+    }
+
+    /// data [ { student }, { student } ]
+    function parseData(data) {
+      const listOfKeys = [];
+
+      for (let o = 0; o < data.length; o++) {
+        const keys = Object.keys(data[o]);
+        listOfKeys.push(keys);
+      }
+
+      const uniqueKeys = []; // Id, Name
+
+      // [ ["Id", "Name"], ["Id", "Name", "Age"]]
+      for (let k = 0; k < listOfKeys.length; k++) {
+        for (let l = 0; l < listOfKeys[k].length; l++) {
+          // ["orange"].indexOf("apple") -1
+          if (uniqueKeys.indexOf(listOfKeys[k][l]) === -1) {
+            uniqueKeys.push(listOfKeys[k][l]);
+          }
+        }
+      }
+
+      const headers = {};
+      for (let f = 0; f < uniqueKeys.length; f++) {
+        headers[uniqueKeys[f]] = uniqueKeys[f];
+      }
+
+      return {
+        headers: headers,
+        rows: data
+      };
+    }
+
+    function fetchStudents_onclick() {
+      fetchStudentsAsync().then((data) => {
+        console.log("beginning parse", data);
+        const parsed = parseData(data);
+
+        console.log("parsed data", parsed);
+
+        const table = createTable(parsed.headers, parsed.rows);
+        insertTable(table);
+      });
+    }
+  </script>
+</html>
