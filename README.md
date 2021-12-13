@@ -1,7 +1,7 @@
 ## Requirements
 
-Google Chrome \[[download](https://www.google.com/chrome/)\]
-Node.js \[[download](https://nodejs.org/)\]
+- Google Chrome \[[download](https://www.google.com/chrome/)\]
+- Node.js \[[download](https://nodejs.org/)\]
 
 ## Launching
 
