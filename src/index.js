@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
 const express = require("express");
@@ -9,6 +10,22 @@ require("debug").enable("app");
 
 (async () => {
   const dbFilePath = path.join(__dirname, "../tmp/database.db");
+  const dbFileRoot = path.dirname(dbFilePath);
+  // let fileExists = false;
+  // fs.readdirSync(dbFileRoot, function (err, files) {
+  //   if (err) {
+  //     debug.extend("error")("Error reading directory: %s", err.path);
+  //     return;
+  //   }
+
+  //   debug("files: %o", files);
+  //   if (files.indexOf(path.basename(dbFilePath)) >= 0) {
+  //     fileExists = true;
+  //   }
+  // });
+
+  // if (!fileExists) fs.writeFileSync(dbFilePath);
+
   debug("Mounting db at path: %s", dbFilePath);
 
   const db = await sqlite.open({
@@ -59,6 +76,7 @@ require("debug").enable("app");
       res.render("index.html");
     });
 
+    /// select
     app.get("/students", async (_req, res) => {
       const students = await db.all(`SELECT Id, Name FROM Students`);
 
@@ -67,7 +85,14 @@ require("debug").enable("app");
       res.json(students);
     });
 
-    app.post("/create-student", (_req, res) => {
+    app.get("/students/:id", async (req) => {
+      const result = db.get(
+        `SELECT Id, Name WHERE Id = ${req.params.id} FROM Students`
+      );
+    });
+
+    /// insert or update
+    app.post("/students", (_req, res) => {
       debug(
         "Somebody just tried to post to the create-student endpoint: %o",
         _req.body
@@ -83,6 +108,31 @@ require("debug").enable("app");
       );
 
       res.redirect("/");
+    });
+
+    /// delete
+    app.delete("/students/:id", async (req, res) => {
+      debug("Deleting student with id: %s", req.params.id);
+      try {
+        const result = await db.run(
+          `DELETE FROM Students
+           WHERE Id = $id
+          `,
+          {
+            $id: req.params.id,
+          }
+        );
+        if (result.changes && result.changes > 0) {
+          debug("Successfully deleted student with id: %s", req.params.id);
+        } else {
+          debug("Successfully deleted nothing!");
+        }
+
+        res.status(200).end();
+      } catch (err) {
+        debug.extend("error")("Error deleting record: %O", err);
+        res.status(500).statusMessage(err.message).end();
+      }
     });
 
     app.listen(port, () => {

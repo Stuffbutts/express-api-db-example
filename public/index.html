@@ -24,10 +24,20 @@
 
       table {
         border-collapse: collapse;
+        width: 100%;
       }
 
       td {
         border: 1px solid black;
+      }
+
+      #delete-student-button {
+        color: white;
+        background-color: red;
+        width: 20px;
+        border-radius: 3px;
+        padding: 2px;
+        margin: auto 3px 3px 3px;
       }
     </style>
   </head>
@@ -48,7 +58,7 @@
           margin: 1em;
         "
       >
-        <form action="/create-student" method="post">
+        <form action="/students" method="post">
           <label for="studentName">Student Name</label>
           <input type="text" name="studentName" id="student-name" />
           <button type="submit">create a student (POST)</button>
@@ -57,6 +67,11 @@
       <div id="table-container">
         <button onclick="fetchStudents_onclick()">Fetch Students</button>
         <div id="table-instance"></div>
+        <form id="delete-student-form">
+          <label for="id">Delete Student</label>
+          <input name="id" id="id-field" type="text" />
+          <button type="button" id="delete-student-button" onclick="deleteStudent_onclick()">x</button>
+        </form>
       </div>
     </div>
   </body>
@@ -81,6 +96,7 @@
        **/
 
       const table = document.createElement("table");
+      table.id = "student-table";
 
       const header = document.createElement("thead");
       const headerRow = document.createElement("tr");
@@ -115,6 +131,11 @@
     }
 
     function insertTable(table) {
+      const existing = document.getElementById("student-table");
+      if (existing !== null) {
+        existing.remove();
+      }
+
       const tableContainer = document.querySelector("div#table-instance");
       tableContainer.appendChild(table);
       return tableContainer;
@@ -132,6 +153,30 @@
       }
 
       return row;
+    }
+
+// do something
+// I will resolve eventually
+// don't know when
+
+// run f1Async()
+// run f2()
+// run f3Async()
+
+// f1Async().then(function (result) {}).then((other) => {})
+//
+// async function f1Async () {
+//    let f3Result = await f3Async();
+// }
+
+    async function deleteStudentAsync(id) {
+      if (!id) return;
+
+      const response = await fetch(`/students/${id}`, {
+        method: "DELETE"
+      });
+
+      return response.ok;
     }
 
     async function fetchStudentsAsync() {
@@ -180,16 +225,35 @@
       };
     }
 
+    async function refreshStudentsTableAsync() {
+      const students = await fetchStudentsAsync();
+      const parsed = parseData(students);
+      const table = createTable(parsed.headers, parsed.rows);
+      insertTable(table);
+    }
+
     function fetchStudents_onclick() {
-      fetchStudentsAsync().then((data) => {
-        console.log("beginning parse", data);
-        const parsed = parseData(data);
+      refreshStudentsTableAsync();
+    }
 
-        console.log("parsed data", parsed);
+    function deleteStudent_onclick() {
+      // todo: should be delete-id-field
+      const input = document.getElementById("id-field");
 
-        const table = createTable(parsed.headers, parsed.rows);
-        insertTable(table);
+      const value = input.value;
+
+      if (!value || value === "") return;
+
+      deleteStudentAsync(value).then(success => {
+        if (success) {
+          alert(`Deleted record id: ${value}`);
+          input.value = "";
+          
+          refreshStudentsTableAsync();
+        }
       });
     }
+
+    refreshStudentsTableAsync();
   </script>
 </html>
