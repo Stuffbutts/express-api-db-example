@@ -16,6 +16,8 @@ require("debug").enable("app");
     driver: sqlite3.Database,
   });
 
+  debug("Connected to db successfully");
+
   async function setupDb() {
     await db.run(`
       DROP TABLE IF EXISTS Students;
@@ -84,7 +86,7 @@ require("debug").enable("app");
     });
 
     app.listen(port, () => {
-      console.log(`Server listening on port ${port}`);
+      debug(`App started, go to: http://localhost:${port}`);
     });
   }
 
