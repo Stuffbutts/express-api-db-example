@@ -1,3 +1,4 @@
+const path = require("path");
 const sqlite3 = require("sqlite3");
 const sqlite = require("sqlite");
 const express = require("express");
@@ -8,7 +9,7 @@ require("debug").enable("app");
 
 (async () => {
   const db = await sqlite.open({
-    filename: "/tmp/database.db",
+    filename: path.resolve(__dirname, "/tmp/database.db"),
     driver: sqlite3.Database
   });
 
