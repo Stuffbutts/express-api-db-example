@@ -85,17 +85,19 @@ require("debug").enable("app");
       res.json(students);
     });
 
-    app.get("/students/:id", async (req) => {
-      const result = db.get(
-        `SELECT Id, Name WHERE Id = ${req.params.id} FROM Students`
+    app.get("/students/:id", async (req, res) => {
+      const result = await db.get(
+        `SELECT Id, Name FROM Students WHERE Id = ${req.params.id}`
       );
+
+      res.json(result);
     });
 
     /// insert or update
-    app.post("/students", (_req, res) => {
+    app.post("/students", (req, res) => {
       debug(
         "Somebody just tried to post to the create-student endpoint: %o",
-        _req.body
+        req.body
       );
 
       db.run(
@@ -103,7 +105,7 @@ require("debug").enable("app");
         INSERT INTO Students (Name) VALUES ($name);
       `,
         {
-          $name: _req.body.studentName,
+          $name: req.body.studentName,
         }
       );
 

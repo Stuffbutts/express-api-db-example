@@ -72,6 +72,11 @@
           <input name="id" id="id-field" type="text" />
           <button type="button" id="delete-student-button" onclick="deleteStudent_onclick()">x</button>
         </form>
+        <form id="get-student-form">
+          <label for="get-id-field">Get Student</label>
+          <input type="text" name="id" id="get-id-field">
+          <button type="button" id="get-student-button" onclick="getStudent_onclick()">✅</button>
+        </form>
       </div>
     </div>
   </body>
@@ -193,6 +198,13 @@
       return body;
     }
 
+    async function getStudentByIdAsync(id) {
+      const response = await fetch(`/students/${id}`);
+
+      if (!response.ok) return;
+
+      return await response.json();
+    }
     /// data [ { student }, { student } ]
     function parseData(data) {
       const listOfKeys = [];
@@ -251,6 +263,17 @@
           
           refreshStudentsTableAsync();
         }
+      });
+    }
+
+    function getStudent_onclick() {
+      const input = document.getElementById("get-id-field");
+      const value = input.value;
+
+      if (!value || value === "") return;
+      
+      getStudentByIdAsync(value).then(data => {
+        alert(JSON.stringify(data));
       });
     }
 
