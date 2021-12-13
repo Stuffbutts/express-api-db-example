@@ -14,3 +14,5 @@ npm install
 ```bash
 npm run start
 ```
+
+In chrome navigate to localhost:8080
