@@ -8,8 +8,11 @@ const debug = require("debug")("app");
 require("debug").enable("app");
 
 (async () => {
+  const dbFilePath = path.resolve(__dirname, "/tmp/database.db");
+  debug("Mounting db at path: %s", dbFilePath);
+
   const db = await sqlite.open({
-    filename: path.resolve(__dirname, "/tmp/database.db"),
+    filename: dbFilePath,
     driver: sqlite3.Database
   });
 
