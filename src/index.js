@@ -8,12 +8,12 @@ const debug = require("debug")("app");
 require("debug").enable("app");
 
 (async () => {
-  const dbFilePath = path.resolve(__dirname, "/tmp/database.db");
+  const dbFilePath = path.join(__dirname, "../tmp/database.db");
   debug("Mounting db at path: %s", dbFilePath);
 
   const db = await sqlite.open({
     filename: dbFilePath,
-    driver: sqlite3.Database
+    driver: sqlite3.Database,
   });
 
   async function setupDb() {
@@ -76,7 +76,7 @@ require("debug").enable("app");
         INSERT INTO Students (Name) VALUES ($name);
       `,
         {
-          $name: _req.body.studentName
+          $name: _req.body.studentName,
         }
       );
 
